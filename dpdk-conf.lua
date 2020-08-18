@@ -5,7 +5,7 @@
 -- In this case it may be necessary to use the blacklist or whitelist features in some configurations.
 DPDKConfig {
 	-- configure the CPU cores to use, default: all cores
-	--cores = {0, 10, 11, 12, 13, 14, 15},
+	cores = {0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12},
 	
 	-- max number of shared tasks running on core 0
 	--sharedCores = 8,
@@ -13,7 +13,7 @@ DPDKConfig {
 	-- black or whitelist devices to limit which PCI devs are used by DPDK
 	-- only one of the following examples can be used
 	--pciBlacklist = {"0000:81:00.3","0000:81:00.1"},
-	--pciWhitelist = {"0000:81:00.3","0000:81:00.1"},
+	pciWhitelist = {"0000:02:00.0", "0000:81:00.0"}
 	
 	-- arbitrary DPDK command line options
 	-- the following configuration allows multiple DPDK instances (use together with pciWhitelist)

@@ -56,6 +56,14 @@ function dev:init()
 	-- result will be at least 6, otherwise the above statements would have failed
 	self.numxstats = tonumber(result)
 
+	-- get initial stats
+	os.execute("ethtool -S ens1f0 >/dev/null")
+	local pktFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_packets", "r")
+	local byteFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_bytes", "r")
+	self.iniRxPkts = tonumber(pktFile:read("*all"))
+	self.iniRxBytes = tonumber(byteFile:read("*all"))
+	pktFile:close()
+	byteFile:close()
 end
 
 --- Retrieve RxStats which are comparable between most devices
@@ -67,14 +75,28 @@ function dev:getRxStats()
 	-- this function is called once every second or so. Performance penalty should be negligible
 
 	-- only allocate xstats once
-	if not self.xstats then
-		self.xstats = ffi.new("struct rte_eth_xstat[?]", self.numxstats)
-	end
-        C.rte_eth_xstats_get(self.id, self.xstats, self.numxstats)
+	-- if not self.xstats then
+	-- 	self.xstats = ffi.new("struct rte_eth_xstat[?]", self.numxstats)
+	-- end
+        -- C.rte_eth_xstats_get(self.id, self.xstats, self.numxstats)
 
 	-- sum of all recieved unicast, multicast and broadcast bytes/packets
-	self.rxPkts = (self.xstats[self.uc_pkt_id].value or 0ULL) + (self.xstats[self.mc_pkt_id].value or 0ULL) + (self.xstats[self.bc_pkt_id].value or 0ULL)
-	self.rxBytes =  (self.xstats[self.uc_byte_id].value or 0ULL) + (self.xstats[self.mc_byte_id].value or 0ULL) + (self.xstats[self.bc_byte_id].value or 0ULL)
+	-- self.rxPkts = (self.xstats[self.uc_pkt_id].value or 0ULL) + (self.xstats[self.mc_pkt_id].value or 0ULL) + (self.xstats[self.bc_pkt_id].value or 0ULL)
+	-- self.rxBytes =  (self.xstats[self.uc_byte_id].value or 0ULL) + (self.xstats[self.mc_byte_id].value or 0ULL) + (self.xstats[self.bc_byte_id].value or 0ULL)
+	
+	-- rx_packets_phy is the right counter to use here!
+	-- but DPDK 17.08 does not expose it in xstats
+	-- QUICK HACK: Retrieve the stats directly from mlx5 kernel driver via sysfs
+	-- somehow the sysfses do not get updated without executing ethtool first...
+	-- overhead is acceptable since we only run it at the end of a benchmark round
+	os.execute("ethtool -S ens1f0 >/dev/null")
+	local pktFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_packets", "r")
+	local byteFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_bytes", "r")
+	self.rxPkts = tonumber(pktFile:read("*all")) - self.iniRxPkts
+	self.rxBytes = tonumber(byteFile:read("*all")) - self.iniRxBytes
+	pktFile:close()
+	byteFile:close()
+
 	return tonumber(self.rxPkts), tonumber( self.rxBytes)
 end
 

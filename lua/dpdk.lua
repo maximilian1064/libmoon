@@ -137,12 +137,22 @@ function mod.init()
 	local coreMask
 	if not cfg.cores then
 		-- default: use all the cores
-		local cpus = io.open("/proc/cpuinfo", "r")
-		cfg.cores = {}
-		for cpu in cpus:read("*a"):gmatch("processor	: (%d+)") do
-			cfg.cores[#cfg.cores + 1] = tonumber(cpu)
+		-- local cpus = io.open("/proc/cpuinfo", "r")
+		cfg.cores = {0}
+		local num_cores = 13
+		for i = 1, num_cores do
+			cfg.cores[i + 1] = i
 		end
-		cpus:close()
+		for i = 1, num_cores do
+			cfg.cores[i + num_cores + 1] = i + 14
+		end
+		for _, i in ipairs(cfg.cores) do
+			print(i)
+		end
+		--for cpu in cpus:read("*a"):gmatch("processor	: (%d+)") do
+		--	cfg.cores[#cfg.cores + 1] = tonumber(cpu)
+		--end
+		--cpus:close()
 	end
 	table.sort(cfg.cores)
 	libmoon.config.cores = cfg.cores
