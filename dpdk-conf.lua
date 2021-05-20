@@ -13,7 +13,7 @@ DPDKConfig {
 	-- black or whitelist devices to limit which PCI devs are used by DPDK
 	-- only one of the following examples can be used
 	--pciBlacklist = {"0000:81:00.3","0000:81:00.1"},
-	pciWhitelist = {"0000:02:00.0", "0000:81:00.0"}
+	--pciWhitelist = {"0000:02:00.0", "0000:81:00.0"}
 	
 	-- arbitrary DPDK command line options
 	-- the following configuration allows multiple DPDK instances (use together with pciWhitelist)

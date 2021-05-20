@@ -57,9 +57,9 @@ function dev:init()
 	self.numxstats = tonumber(result)
 
 	-- get initial stats
-	os.execute("ethtool -S ens1f0 >/dev/null")
-	local pktFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_packets", "r")
-	local byteFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_bytes", "r")
+	os.execute("ethtool -S enp196s0 >/dev/null")
+	local pktFile = io.open("/sys/class/net/enp196s0/phy_stats/rx_packets", "r")
+	local byteFile = io.open("/sys/class/net/enp196s0/phy_stats/rx_bytes", "r")
 	self.iniRxPkts = tonumber(pktFile:read("*all"))
 	self.iniRxBytes = tonumber(byteFile:read("*all"))
 	pktFile:close()
@@ -89,9 +89,9 @@ function dev:getRxStats()
 	-- QUICK HACK: Retrieve the stats directly from mlx5 kernel driver via sysfs
 	-- somehow the sysfses do not get updated without executing ethtool first...
 	-- overhead is acceptable since we only run it at the end of a benchmark round
-	os.execute("ethtool -S ens1f0 >/dev/null")
-	local pktFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_packets", "r")
-	local byteFile = io.open("/sys/class/net/ens1f0/phy_stats/rx_bytes", "r")
+	os.execute("ethtool -S enp196s0 >/dev/null")
+	local pktFile = io.open("/sys/class/net/enp196s0/phy_stats/rx_packets", "r")
+	local byteFile = io.open("/sys/class/net/enp196s0/phy_stats/rx_bytes", "r")
 	self.rxPkts = tonumber(pktFile:read("*all")) - self.iniRxPkts
 	self.rxBytes = tonumber(byteFile:read("*all")) - self.iniRxBytes
 	pktFile:close()
